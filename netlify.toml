@@ -1,6 +1,6 @@
 [build]
   command = "npm install"
-  publish = "Calosee-main"
+  publish = "."
   functions = "netlify/functions"
 
 [[redirects]]
