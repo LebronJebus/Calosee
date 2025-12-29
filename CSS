@@ -1,0 +1,1341 @@
+/* ----------  ROOT VARIABLES  ---------- */
+:root {
+  --blue: #061336;
+  --red: #8b001a;
+  --ring-day: #00e5ff;
+  --ring-week: #ffc300;
+  --macro-protein: #50c878;
+  --macro-fat: #b8860b;
+  --macro-carbs: #a9746e;
+  --primary-hover: #ff5e7d;
+  --user-label: #8bd3ff;
+  --bot-label: #a3ffa3;
+  --bmr-indicator: #ffffffdd;           /* Increased opacity */
+}
+
+/* ========== GLOBAL RESET ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+body {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--red) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease-in-out infinite;
+  overflow: hidden;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+
+  /* ✅ Add this line */
+  transition: background 1s ease-in-out;
+}
+
+  height: 100%;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #fff;
+}
+
+body {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--red) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease-in-out infinite;
+  overflow: hidden;
+}
+
+/* ----------  BACKGROUND EFFECTS  ---------- */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.angled-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.04);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 0 90%);
+}
+
+.shine-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at top left,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 60%);
+  mix-blend-mode: overlay;
+  animation: shineRotate 30s linear infinite;
+}
+
+@keyframes shineRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ----------  VIEWPORT / SCREENS  ---------- */
+.viewport {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+}
+
+.screen {
+  flex: 0 0 100%;
+  height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  scroll-snap-align: start;
+}
+
+.home-screen,
+.weekly-screen {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* ----------  GREETING  ---------- */
+.greeting {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+/* ----------  MAIN CALORIE RING  ---------- */
+.stats-circle,
+.weekly-circle {
+  --glow-colour: var(--ring-day);
+  position: relative;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.2rem;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px) saturate(160%);
+  padding: 0.75rem;
+  margin-top: -1rem;
+  overflow: hidden;
+}
+
+.stats-circle p.subtitle,
+.stats-circle p.large-number,
+.stats-circle p.mini {
+  margin: 0;
+}
+
+.stats-circle::before,
+.weekly-circle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10%;
+  padding: 6px;
+  background: conic-gradient(
+    var(--ring-day) 0deg var(--deg, 0deg),
+    rgba(255, 255, 255, 0.08) var(--deg, 0deg) 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent 80%, #000 0);
+  mask: radial-gradient(farthest-side, transparent 80%, #000 0);
+  filter: brightness(1.2) drop-shadow(0 0 12px var(--glow-colour))
+                      drop-shadow(0 0 22px var(--glow-colour));
+  animation: ringPulse 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Thin arc line for BMR */
+.stats-circle::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--bmr-indicator) 0deg var(--bmr-deg, 290deg),
+    transparent var(--bmr-deg, 290deg) 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent 96%, #000 96%);
+  mask: radial-gradient(farthest-side, transparent 96%, #000 96%);
+  pointer-events: none;
+}
+
+.subtitle      { font-size: 0.8rem;  opacity: 0.85; }
+.large-number  { font-size: 2rem;    font-weight: 600; }
+.mini          { font-size: 0.65rem; opacity: 0.80;   text-align: center; }
+
+/* ----------  MACRO RINGS  ---------- */
+.ring-container {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.macro-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px) saturate(160%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.macro-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 50%;
+  -webkit-mask: radial-gradient(farthest-side, transparent 90%, #000 0);
+  mask: radial-gradient(farthest-side, transparent 90%, #000 0);
+  background: conic-gradient(
+    var(--macro-colour) 0deg var(--deg, 0deg),
+    rgba(255, 255, 255, 0.06) var(--deg, 0deg) 360deg);
+  filter: brightness(1.3) drop-shadow(0 0 16px var(--macro-colour))
+                      drop-shadow(0 0 36px var(--macro-colour));
+  transition: background 0.6s ease, filter 0.6s ease;
+  animation: macroPulseExpand 1.1s ease-out infinite;
+}
+
+.macro-letter  { font-size: 0.9rem; font-weight: 600; line-height: 1; }
+.macro-amount  { font-size: 0.75rem; opacity: 0.9;   line-height: 1; }
+
+.protein { --macro-colour: var(--macro-protein); }
+.fat     { --macro-colour: var(--macro-fat);     }
+.carbs   { --macro-colour: var(--macro-carbs);   }
+
+/* ----------  CHAT SECTION  ---------- */
+.chat-section {
+  position: relative;
+  margin-top: auto;
+  height: 40%;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 20px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+}
+
+.chat-box {
+  flex: 1;
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 0.6rem;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+input[type="text"]:focus  { background: rgba(255, 255, 255, 0.25); }
+input::placeholder         { color: rgba(255, 255, 255, 0.65); }
+
+button {
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover  { background: var(--primary-hover); }
+button:active { transform: scale(0.96); }
+
+/* ----------  LIGHTSABER / PULSE ANIMATIONS  ---------- */
+@keyframes pulseExpand {
+  0%   { transform: scale(1);   box-shadow: 0 0 10px var(--glow-colour); }
+  50%  { transform: scale(1.08); box-shadow: 0 0 30px var(--glow-colour), 0 0 60px var(--glow-colour); }
+  100% { transform: scale(1);   box-shadow: 0 0 10px var(--glow-colour); }
+}
+
+@keyframes macroPulseExpand {
+  0%   { transform: scale(1);   box-shadow: 0 0 8px var(--macro-colour); }
+  50%  { transform: scale(1.1); box-shadow: 0 0 36px var(--macro-colour), 0 0 72px var(--macro-colour); }
+  100% { transform: scale(1);   box-shadow: 0 0 8px var(--macro-colour); }
+}
+
+@keyframes ringPulse {
+  0%   { filter: brightness(1)   drop-shadow(0 0 10px var(--glow-colour)); }
+  50%  { filter: brightness(1.4) drop-shadow(0 0 30px var(--glow-colour)); }
+  100% { filter: brightness(1)   drop-shadow(0 0 10px var(--glow-colour)); }
+}
+
+.pulse              { animation: pulseExpand 1s   ease-out; }
+.macro-ring.pulse   { animation: macroPulseExpand 1.1s ease-out; }
+
+/* ----------  MODAL  ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+  background: #121a2e;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.modal-buttons button {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.modal-buttons button:hover { background: var(--primary-hover); }
+
+/* Modal animations */
+@keyframes modalFadeIn  {
+  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+ 100% { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+@keyframes modalFadeOut {
+  0% { opacity: 1; transform: scale(1)    translateY(0);   }
+ 100% { opacity: 0; transform: scale(0.9) translateY(-10px);}
+}
+.modal.show .modal-content { animation: modalFadeIn  0.35s ease-out forwards; }
+.modal.hide .modal-content { animation: modalFadeOut 0.45s ease-in  forwards; }
+
+/* ----------  CONFIRMATION FORM  ---------- */
+.confirm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+  margin-top: 1rem;
+}
+.confirm-form label {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+.confirm-form input {
+  margin-top: 4px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.confirm-form input:focus { background: rgba(255, 255, 255, 0.25); }
+
+/* ----------  ONBOARDING FORM  ---------- */
+.onboarding-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.onboarding-form label {
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base styling for text inputs, ranges, and (fallback) selects */
+.onboarding-form input,
+.onboarding-form select {
+  margin-top: 4px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.onboarding-form input:focus,
+.onboarding-form select:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- GLASSY, iOS-STYLE SELECT ---- */
+.onboarding-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  cursor: pointer;
+  padding-right: 2.5rem;        /* give space for arrow */
+  position: relative;
+}
+
+/* Container for custom arrow (wrap the <select> in .select-wrapper) */
+.select-wrapper { position: relative; }
+.select-wrapper::after {
+  content: "▾";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+/* Range sliders */
+.onboarding-form input[type="range"] {
+  width: 100%;
+  margin-top: 8px;
+  accent-color: var(--red);
+}
+
+.onboarding-form span {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 4px;
+}
+
+/* Make sure the main app fades in after onboarding */
+#appMain {
+  opacity: 0;
+  transition: opacity 0.6s ease-in;
+}
+#appMain:not(.hidden) { opacity: 1; }
+:root {
+  --blue: #061336;
+  --red: #8b001a;
+  --ring-day: #00e5ff;
+  --ring-week: #ffc300;
+  --macro-protein: #50c878;
+  --macro-fat: #b8860b;
+  --macro-carbs: #a9746e;
+  --primary-hover: #ff5e7d;
+  --user-label: #8bd3ff;
+  --bot-label: #a3ffa3;
+  --bmr-indicator: #ffffffdd;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--red) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease-in-out infinite;
+  overflow: hidden;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.angled-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.04);
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 0 90%);
+}
+
+.shine-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%);
+  mix-blend-mode: overlay;
+  animation: shineRotate 30s linear infinite;
+}
+
+@keyframes shineRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.viewport {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+}
+
+.screen {
+  flex: 0 0 100%;
+  height: 100%;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  scroll-snap-align: start;
+}
+
+.home-screen,
+.weekly-screen {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* ---------- Greeting ---------- */
+.greeting {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+/* ---------- Calorie Ring ---------- */
+.stats-circle,
+.weekly-circle {
+  --glow-colour: var(--ring-day);
+  position: relative;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px) saturate(160%);
+  padding: 0.75rem;
+  margin-top: -1rem;
+  overflow: hidden;
+}
+
+.stats-circle::before,
+.weekly-circle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 10%;
+  padding: 6px;
+  background: conic-gradient(
+    var(--ring-day) 0deg var(--deg, 0deg),
+    rgba(255, 255, 255, 0.1) var(--deg, 0deg) 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent 80%, #000 0);
+  mask: radial-gradient(farthest-side, transparent 80%, #000 0);
+  filter: brightness(1.2) drop-shadow(0 0 12px var(--glow-colour))
+                      drop-shadow(0 0 22px var(--glow-colour));
+  animation: ringPulse 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+.stats-circle::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--bmr-indicator) 0deg var(--bmr-deg, 290deg),
+    transparent var(--bmr-deg, 290deg) 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent 96%, #000 96%);
+  mask: radial-gradient(farthest-side, transparent 96%, #000 96%);
+  pointer-events: none;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.large-number {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.mini {
+  font-size: 0.65rem;
+  opacity: 0.8;
+  text-align: center;
+  max-width: 100%;
+}
+
+/* ---------- Macro Rings ---------- */
+.ring-container {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.macro-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px) saturate(160%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.macro-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--macro-colour) 0deg var(--deg, 0deg),
+    rgba(255, 255, 255, 0.06) var(--deg, 0deg) 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent 90%, #000 0);
+  mask: radial-gradient(farthest-side, transparent 90%, #000 0);
+  filter: brightness(1.3) drop-shadow(0 0 16px var(--macro-colour))
+                      drop-shadow(0 0 36px var(--macro-colour));
+  animation: macroPulseExpand 1.1s ease-out;
+}
+
+.macro-letter {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.macro-amount {
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.protein { --macro-colour: var(--macro-protein); }
+.fat     { --macro-colour: var(--macro-fat); }
+.carbs   { --macro-colour: var(--macro-carbs); }
+
+/* ---------- Weekly Graph ---------- */
+.weekly-graph-container {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.weekly-chart {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 150px;
+  width: 100%;
+  padding: 0 0.5rem;
+  gap: 0.25rem;
+}
+
+.bar {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(to top, var(--ring-week), rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  transition: height 0.4s ease;
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.weekly-macros {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.weekly-summary {
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Chat Section ---------- */
+.chat-section {
+  position: relative;
+  margin-top: auto;
+  height: 40%;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(20px) saturate(160%);
+  border-radius: 20px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+}
+
+.chat-box {
+  flex: 1;
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 0.6rem;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+input[type="text"]:focus {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+button {
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: var(--primary-hover);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+/* ---------- Animations ---------- */
+@keyframes pulseExpand {
+  0%   { transform: scale(1);   box-shadow: 0 0 10px var(--glow-colour); }
+  50%  { transform: scale(1.08); box-shadow: 0 0 30px var(--glow-colour), 0 0 60px var(--glow-colour); }
+  100% { transform: scale(1);   box-shadow: 0 0 10px var(--glow-colour); }
+}
+
+@keyframes macroPulseExpand {
+  0%   { transform: scale(1);   box-shadow: 0 0 8px var(--macro-colour); }
+  50%  { transform: scale(1.1); box-shadow: 0 0 36px var(--macro-colour), 0 0 72px var(--macro-colour); }
+  100% { transform: scale(1);   box-shadow: 0 0 8px var(--macro-colour); }
+}
+
+@keyframes ringPulse {
+  0%   { filter: brightness(1) drop-shadow(0 0 10px var(--glow-colour)); }
+  50%  { filter: brightness(1.4) drop-shadow(0 0 30px var(--glow-colour)); }
+  100% { filter: brightness(1) drop-shadow(0 0 10px var(--glow-colour)); }
+}
+
+/* ---------- iOS Select ---------- */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.select-wrapper::after {
+  content: "▾";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  font-size: 1rem;
+}
+/* === LIGHTER “GLASS” PANELS ==================================== */
+/*  ↓ was rgba(0,0,0,0.28)  */
+.stats-circle,
+.weekly-circle,
+.macro-ring,
+.chat-section {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/*  ↓ was rgba(255,255,255,0.15) for input fields  */
+.onboarding-form input,
+.onboarding-form select,
+input[type="text"] {
+  background: rgba(255, 255, 255, 0.12);
+}
+input[type="text"]:focus,
+.onboarding-form input:focus,
+.onboarding-form select:focus {
+  background: rgba(255, 255, 255, 0.20);
+}
+#onboard {
+  background: rgba(0, 0, 0, 0.18); /* More transparent than original */
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-radius: 20px;
+  padding: 2rem;
+}
+body.bright-bg {
+  background: linear-gradient(
+    135deg,
+    rgba(6, 19, 54, 0.75) 0%,
+    rgba(139, 0, 26, 0.75) 100%
+  );
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease-in-out infinite;
+}
+.weekly-summary-bar {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avg-bar-track {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.avg-bar-fill {
+  height: 100%;
+  background: linear-gradient(to right, #00bfff, #66ccff); /* light-to-deep blue */
+  border-radius: 12px 0 0 12px;
+  width: 0%;
+  transition: width 0.8s ease-out;
+}
+
+.goal-line,
+.tdee-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: white;
+  opacity: 0.9;
+}
+
+.goal-line {
+  left: 0%;
+  background: #ffffff;
+}
+
+.tdee-line {
+  left: 0%;
+  background: cyan;
+}
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.bar {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(to top, var(--ring-week), rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
+  transition: height 0.4s ease;
+  min-height: 4px;
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffffffaa;
+  pointer-events: none;
+}
+
+.bar-info {
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 0.2rem;
+  line-height: 1.2;
+  min-height: 2.2em;
+  opacity: 0.9;
+}
+
+.bar-date {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  opacity: 0.8;
+}
+/* Weekly bar-graph columns */
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;        /* <— enables %-based bar height */
+}
+.weekly-macros-rings {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  justify-content: center;
+}
+.weekly-summary-bar {
+  margin-bottom: 1rem; /* add margin between bar and macro rings */
+}
+
+.weekly-macros-rings {
+  margin-bottom: 0;
+}
+/* === WEEKLY BAR (slightly thicker, glassier, better date position) === */
+.weekly-chart {
+  gap: 0.6rem;
+}
+
+.bar {
+  width: 18px;  /* Thicker than 14px */
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px) saturate(150%);
+  -webkit-backdrop-filter: blur(8px) saturate(150%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  position: relative;
+  transition: height 0.4s ease, background 0.25s ease;
+  overflow: visible;
+}
+
+/* TDEE indicator line */
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* ⬇️ DATE inside bar, moved lower and horizontal */
+.bar::before {
+  content: attr(data-date);
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #fff;
+  opacity: 0.85;
+  pointer-events: none;
+}
+/* === Weekly Calorie Bar - iOS Glassy Aesthetic === */
+.weekly-chart {
+  gap: 0.7rem;
+  align-items: flex-end;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.bar {
+  width: 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px) saturate(200%);
+  -webkit-backdrop-filter: blur(15px) saturate(200%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: height 0.5s ease, background 0.3s ease;
+  overflow: visible;
+}
+
+.bar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.bar::before {
+  content: attr(data-date);
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bar-info {
+  font-size: 0.75rem;
+  text-align: center;
+  margin-top: 0.3rem;
+  opacity: 0.9;
+}
+
+/* Enhance the color gradient for more vibrance */
+.bar[data-surplus="true"] {
+  background: linear-gradient(to top, #ff5e7d, rgba(255, 94, 125, 0.3));
+}
+
+.bar[data-surplus="false"] {
+  background: linear-gradient(to top, #00e5ff, rgba(0, 229, 255, 0.3));
+}
+/* === Weekly Calorie Bar - Enhanced iOS Glassy Aesthetic === */
+.weekly-chart {
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+}
+
+.bar {
+  width: 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px) saturate(200%);
+  -webkit-backdrop-filter: blur(15px) saturate(200%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: height 0.5s ease, background 0.3s ease;
+  overflow: visible;
+}
+
+.bar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.bar::before {
+  content: attr(data-date);
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bar-info {
+  font-size: 0.7rem;
+  text-align: center;
+  margin-top: 0.4rem;
+  opacity: 0.95;
+  line-height: 1.2;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  padding: 2px 4px;
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Labels for clarity */
+.bar-info::before {
+  content: "Cal: ";
+  font-weight: 600;
+}
+
+/* Enhance the color gradient for more vibrance */
+.bar[data-surplus="true"] {
+  background: linear-gradient(to top, #ff5e7d, rgba(255, 94, 125, 0.3));
+}
+
+.bar[data-surplus="false"] {
+  background: linear-gradient(to top, #00e5ff, rgba(0, 229, 255, 0.3));
+}
+/* === Weekly Calorie Bar - Enhanced iOS Glassy Aesthetic === */
+.weekly-chart {
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+}
+
+.bar {
+  width: 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px) saturate(200%);
+  -webkit-backdrop-filter: blur(15px) saturate(200%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: height 0.5s ease, background 0.3s ease;
+  overflow: visible;
+}
+
+.bar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.bar::before {
+  content: attr(data-date);
+  position: absolute;
+  bottom: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bar-info {
+  font-size: 0.7rem;
+  text-align: center;
+  margin-top: 0.4rem;
+  opacity: 0.95;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 2px 4px;
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Labels for clarity */
+.bar-info::before {
+  content: "Cal: ";
+  font-weight: 600;
+}
+
+/* Enhance the color gradient for more vibrance */
+.bar[data-surplus="true"] {
+  background: linear-gradient(to top, #ff5e7d, rgba(255, 94, 125, 0.3));
+}
+
+.bar[data-surplus="false"] {
+  background: linear-gradient(to top, #00e5ff, rgba(0, 229, 255, 0.3));
+}
+/* === Weekly Calorie Bar - Enhanced iOS Glassy Aesthetic === */
+.weekly-chart {
+  gap: 0.8rem;
+  align-items: flex-end;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  position: relative;
+}
+
+.bar {
+  width: 24px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px) saturate(200%);
+  -webkit-backdrop-filter: blur(15px) saturate(200%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  position: relative;
+  transition: height 0.5s ease, background 0.3s ease;
+  overflow: visible;
+}
+
+.bar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--tdee-percent, 0%) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.bar::before {
+  content: attr(data-date);
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.bar-info {
+  font-size: 0.7rem;
+  text-align: center;
+  margin-top: 0.4rem;
+  opacity: 0.95;
+  line-height: 1.2;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 2px 5px;
+  backdrop-filter: blur(12px) saturate(180%);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Labels for clarity */
+.bar-info::before {
+  content: "Cal: ";
+  font-weight: 600;
+}
+
+/* Enhance the color gradient for more vibrance */
+.bar[data-surplus="true"] {
+  background: linear-gradient(to top, #ff5e7d, rgba(255, 94, 125, 0.3));
+}
+
+.bar[data-surplus="false"] {
+  background: linear-gradient(to top, #00e5ff, rgba(0, 229, 255, 0.3));
+}
