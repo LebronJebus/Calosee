@@ -366,7 +366,42 @@ async function sendMessage() {
       })
     });
 
-    const data = await response.json();
+   const response = await fetch("/.netlify/functions/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ messages }),
+/* messages = your array */
+});
+
+const raw = await response.text(); // <-- read raw text first
+
+if (!response.ok) {
+  console.error("API status:", response.status);
+  console.error("API raw response:", raw);
+  throw new Error(`API error ${response.status}: ${raw || "(empty body)"}`);
+}
+
+if (!raw.trim()) {
+  console.error("Empty response body from function");
+  throw new Error("Empty response body from function");
+}
+
+let data;
+try {
+  data = JSON.parse(raw);
+} catch (e) {
+  console.error("Non-JSON response:", raw);
+  throw new Error("Server returned non-JSON response");
+}
+
+// Expect { reply: "..." }
+if (!data.reply) {
+  console.error("JSON parsed but missing reply:", data);
+  throw new Error("Server response missing 'reply'");
+}
+
+handleGPTReply(data.reply);
+
     // Accept either OpenAI-style or server-wrapped reply
     const reply = data.choices?.[0]?.message?.content?.trim() ?? data.reply ?? "";
 
