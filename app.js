@@ -97,6 +97,11 @@ document.getElementById("saveSettings").addEventListener("click", () => {
 /* ----- load on start ----- */
 loadSettings();
 
+/* Ensure UI is initialized safely after loading settings */
+updateMacros();
+updateConsumed(0);
+renderWeekly();
+
   /* ----- onboarding sliders ----- */
   const weightSlider = document.getElementById("obWeight");
   const heightSlider = document.getElementById("obHeight");
@@ -161,6 +166,7 @@ loadSettings();
  *  RING ANIMATION LOGIC    *
  ***************************/
 function updateRing(el, progress) {
+  if (!el) return;
   const cappedProgress = Math.min(progress, 1);
   const targetDeg = cappedProgress * 360;
   const currentDeg = parseFloat(el.style.getPropertyValue("--deg") || "0");
@@ -196,12 +202,14 @@ function updateNet() {
   const diff  = TDEE - consumedToday;
   const label = diff < 0 ? "Surplus" : diff > 0 ? "Deficit" : "Even";
   const sign  = diff > 0 ? "+" : "";
-  document.getElementById("netLine").innerText = `${label}: ${sign}${diff}`;
+  const netLine = document.getElementById("netLine");
+  if (netLine) netLine.innerText = `${label}: ${sign}${diff}`;
 }
 
 function updateConsumed(add) {
   consumedToday += add;
-  document.getElementById("consumedValue").innerText = consumedToday;
+  const consumedEl = document.getElementById("consumedValue");
+  if (consumedEl) consumedEl.innerText = consumedToday;
   updateRing(document.getElementById("dailyCircle"), consumedToday / GOAL);
   updateNet();
 }
@@ -213,7 +221,8 @@ function updateMacros() {
     { id:"carbRing",    val:carbsToday,   goal:CARB_GOAL, out:"carbValue"   }
   ].forEach(({id,val,goal,out})=>{
     updateRing(document.getElementById(id), val / goal);
-    document.getElementById(out).innerText = `${val} g`;
+    const outEl = document.getElementById(out);
+    if (outEl) outEl.innerText = `${val} g`;
   });
 }
 
@@ -222,7 +231,7 @@ function updateMacros() {
  ***************************/
 function renderWeekly() {
   const container = document.getElementById("weeklyChart");
-  container.innerHTML = "";
+  if (container) container.innerHTML = "";
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -237,26 +246,26 @@ function renderWeekly() {
   const max = Math.max(...days.map(d => d.calories), GOAL, TDEE, 1);
 
   days.forEach(d => {
-  const col = document.createElement("div");
-  col.className = "bar-col";
+    const col = document.createElement("div");
+    col.className = "bar-col";
 
-  const bar = document.createElement("div");
-  bar.className = "bar";
-  bar.style.height = `${(d.calories / max) * 100}%`;
-  bar.style.setProperty("--tdee-percent", `${(TDEE / max) * 100}%`);
-  bar.dataset.date = fmtDate(d.dateObj);          // ⬅️ new date location
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.height = `${(d.calories / max) * 100}%`;
+    bar.style.setProperty("--tdee-percent", `${(TDEE / max) * 100}%`);
+    bar.dataset.date = fmtDate(d.dateObj);          // ⬅️ new date location
 
-  const info = document.createElement("div");
-  info.className = "bar-info";
-  const sign = d.deficit > 0 ? "+" : "";
-  info.innerHTML = (d === days.at(-1) && d.calories === 0)
-    ? ""
-    : `${d.calories}<br>${sign}${d.deficit}`;
+    const info = document.createElement("div");
+    info.className = "bar-info";
+    const sign = d.deficit > 0 ? "+" : "";
+    info.innerHTML = (d === days.at(-1) && d.calories === 0)
+      ? ""
+      : `${d.calories}<br>${sign}${d.deficit}`;
 
-  col.appendChild(bar);
-  col.appendChild(info);
-  container.appendChild(col);
-});
+    col.appendChild(bar);
+    col.appendChild(info);
+    if (container) container.appendChild(col);
+  });
 
 
   // Filter only days with data
@@ -272,33 +281,48 @@ function renderWeekly() {
   const netLbl = avgDiff < 0 ? "Surplus" : avgDiff > 0 ? "Deficit" : "Even";
   const netSign = avgDiff > 0 ? "+" : "";
 
-  document.getElementById("avgCalorieBar").style.width = `${Math.min(avgCal / max, 1) * 100}%`;
-  document.querySelector(".goal-line").style.left = `${(GOAL / max) * 100}%`;
-  document.querySelector(".tdee-line").style.left = `${(TDEE / max) * 100}%`;
+  const avgCalBar = document.getElementById("avgCalorieBar");
+  const goalLine = document.querySelector(".goal-line");
+  const tdeeLine = document.querySelector(".tdee-line");
 
-  document.getElementById("avgLabel").textContent = `Average: ${avgCal} kcal`;
-  document.getElementById("goalLabel").textContent = `Goal: ${GOAL} kcal`;
-  document.getElementById("deficitLabel").textContent = `${netLbl}: ${netSign}${avgDiff}`;
+  if (avgCalBar) avgCalBar.style.width = `${Math.min(avgCal / max, 1) * 100}%`;
+  if (goalLine) goalLine.style.left = `${(GOAL / max) * 100}%`;
+  if (tdeeLine) tdeeLine.style.left = `${(TDEE / max) * 100}%`;
 
-  // 🔵 Weekly Macro Ring Animations
+  const avgLabel = document.getElementById("avgLabel");
+  const goalLabel = document.getElementById("goalLabel");
+  const deficitLabel = document.getElementById("deficitLabel");
+
+  if (avgLabel) avgLabel.textContent = `Average: ${avgCal} kcal`;
+  if (goalLabel) goalLabel.textContent = `Goal: ${GOAL} kcal`;
+  if (deficitLabel) deficitLabel.textContent = `${netLbl}: ${netSign}${avgDiff}`;
+
+  // Weekly Macro Ring Animations (safe: get elements and update)
   updateRing(document.getElementById("weeklyProteinRing"), avgProt / PROT_GOAL);
   updateRing(document.getElementById("weeklyFatRing"),     avgFat / FAT_GOAL);
   updateRing(document.getElementById("weeklyCarbRing"),    avgCarbs / CARB_GOAL);
 
-  document.getElementById("weeklyProteinValue").innerText = `${avgProt} g`;
-  document.getElementById("weeklyFatValue").innerText     = `${avgFat} g`;
-  document.getElementById("weeklyCarbValue").innerText    = `${avgCarbs} g`;
+  const wp = document.getElementById("weeklyProteinValue");
+  const wf = document.getElementById("weeklyFatValue");
+  const wc = document.getElementById("weeklyCarbValue");
+
+  if (wp) wp.innerText = `${avgProt} g`;
+  if (wf) wf.innerText = `${avgFat} g`;
+  if (wc) wc.innerText = `${avgCarbs} g`;
 }
 
 /****************************
  *  ENTRY HANDLER           *
  ***************************/
-function addEntry({calories=0, protein=0, fat=0, carb=0}) {
+function addEntry({calories=0, protein=0, fat=0, carb=0, carbs=0}) {
+  /* normalize carb/carbs */
+  const addedCarbs = + (carb || carbs || 0);
+
   /* update running totals for today */
   updateConsumed(+calories);
   proteinToday += +protein;
   fatToday     += +fat;
-  carbsToday   += +carb;
+  carbsToday   += addedCarbs;
   updateMacros();
 
   /* make sure today's object exists */
@@ -320,15 +344,6 @@ function addEntry({calories=0, protein=0, fat=0, carb=0}) {
 
   renderWeekly();
 }
-// Animate Weekly Macro Rings
-updateRing(document.getElementById("weeklyProteinRing"), avgProt / PROT_GOAL);
-updateRing(document.getElementById("weeklyFatRing"),     avgFat / FAT_GOAL);
-updateRing(document.getElementById("weeklyCarbRing"),    avgCarbs / CARB_GOAL);
-
-document.getElementById("weeklyProteinValue").innerText = `${avgProt} g`;
-document.getElementById("weeklyFatValue").innerText     = `${avgFat} g`;
-document.getElementById("weeklyCarbValue").innerText    = `${avgCarbs} g`;
-
 
 /****************************
  *  CONFIRMATION MODAL      *
@@ -393,6 +408,7 @@ function showExerciseConfirmation(exercise) {
 
 /****************************
  *  ChatGPT INTEGRATION     *
+ *  NOTE: Do not put secrets in client-side JS. Use a server-side proxy.
  ***************************/
 async function sendMessage() {
   const inputEl = document.getElementById("userInput");
@@ -405,14 +421,14 @@ async function sendMessage() {
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // IMPORTANT: Replace the client-side fetch with a call to your server which holds the API key.
+    const response = await fetch("/api/chat", { // server-side endpoint that calls OpenAI
       method : "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization : "Bearer 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"
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model   : "gpt-4.1",
+        // server will use the proper model and the secret key
         messages: [
           { role: "system", content: "Return JSON with type ('food'|'exercise') and items: array of {food|name, calories, protein, fat, carb}." },
           { role: "user",   content: userText }
@@ -421,7 +437,7 @@ async function sendMessage() {
     });
 
     const data = await response.json();
-    const reply = data.choices[0].message.content.trim();
+    const reply = data.choices?.[0]?.message?.content?.trim() ?? data.reply ?? "";
 
     let result;
     try { result = JSON.parse(reply); }
@@ -442,7 +458,8 @@ async function sendMessage() {
         result.items.forEach(item => {
           TDEE += item.calories;
         });
-        document.getElementById("tdeeValue").innerText = TDEE;
+        const tdeeEl = document.getElementById("tdeeValue");
+        if (tdeeEl) tdeeEl.innerText = TDEE;
         updateNet();
         renderWeekly();
         chatBox.innerHTML += `<div class="message bot"><strong>Exercises Logged:</strong><br>${
@@ -477,7 +494,7 @@ function showBatchConfirmation(type, items) {
         const div = document.createElement("div");
         div.innerHTML = `
           <strong>${i+1}. ${item.food}</strong><br>
-          Calories: ${item.calories} kcal, Protein: ${item.protein}g, Fat: ${item.fat}g, Carbs: ${item.carb}g
+          Calories: ${item.calories} kcal, Protein: ${item.protein}g, Fat: ${item.fat}g, Carbs: ${item.carb || item.carbs}g
           <hr style="border:0.5px solid rgba(255,255,255,0.2); margin:8px 0;">
         `;
         list.appendChild(div);
