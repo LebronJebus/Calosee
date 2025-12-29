@@ -354,7 +354,8 @@ async function sendMessage() {
   try {
     // IMPORTANT: This endpoint should be implemented server-side.
     // The server should call OpenAI with the secret key and return the assistant response.
-    const response = await fetch("/api/chat", {
+    const response = await fetch("https://YOUR-NETLIFY-SITE.netlify.app/.netlify/functions/chat", ...)
+, {
       method : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
