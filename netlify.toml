@@ -1,0 +1,9 @@
+[build]
+  command = "npm ci"
+  publish = "Calosee-main"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
