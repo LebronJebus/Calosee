@@ -46,3 +46,13 @@ headers: {
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 }
+if (event.httpMethod === "OPTIONS") {
+  return {
+    statusCode: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "https://lebronjebus.github.io",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "POST, OPTIONS"
+    }
+  };
+}
