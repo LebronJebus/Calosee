@@ -1,0 +1,288 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>CaloSee · Calorie Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ========== Onboarding Modal - iOS Inspired Glass Style ========== */
+    #onboardingModal .modal-content {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 350px;
+      width: 90%;
+      color: #fff;
+      text-align: center;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      animation: fadeInScale 0.6s ease;
+    }
+
+    .onboarding-form input[type="text"],
+    .onboarding-form select,
+    .onboarding-form input[type="range"] {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      padding: 0.6rem;
+      border-radius: 12px;
+      color: #fff;
+      width: 100%;
+    }
+
+    .onboarding-form label {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .onboarding-form span {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    #obStart {
+      margin-top: 1.2rem;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.4rem;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #obStart:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes fadeInScale {
+      0% {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ========== Onboarding Modal ========== -->
+  <div id="onboardingModal" class="modal">
+    <div class="modal-content">
+      <h3>Let's get to know you</h3>
+
+      <div class="onboarding-form">
+        <label>Name
+          <input id="obName" type="text" placeholder="Spencer" required />
+        </label>
+
+        <label>Sex
+          <select id="obSex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </label>
+
+        <label>Weight (lb)
+          <span id="weightDisplay">160 lb</span>
+          <input id="obWeight" type="range" min="80" max="400" step="1" value="160" />
+        </label>
+
+        <label>Height (in)
+          <span id="heightDisplay">70 in</span>
+          <input id="obHeight" type="range" min="50" max="84" step="1" value="70" />
+        </label>
+
+        <label>Age
+          <span id="ageDisplay">25</span>
+          <input id="obAge" type="range" min="10" max="100" step="1" value="25" />
+        </label>
+
+        <label>Goal Calories
+          <span id="goalDisplay">2300 kcal</span>
+          <input id="obGoalCalories" type="range" min="1200" max="4000" step="50" value="2300" />
+        </label>
+      </div>
+
+      <button id="obStart">Start Tracking</button>
+    </div>
+  </div>
+
+  <!-- ========== Confirmation Popup ========== -->
+  <div id="confirmationModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Confirm Food Entry</h3>
+      <div id="confirmForm" class="confirm-form">
+        <label>Food: <input id="confirmFood" type="text" /></label>
+        <label>Calories: <input id="confirmCalories" type="number" /></label>
+        <label>Protein (g): <input id="confirmProtein" type="number" /></label>
+        <label>Fat (g): <input id="confirmFat" type="number" /></label>
+        <label>Carbs (g): <input id="confirmCarb" type="number" /></label>
+      </div>
+      <div class="modal-buttons">
+        <button id="confirmNo">No</button>
+        <button id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+<div id="batchModal" class="modal hidden">
+  <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+    <h3 id="batchModalTitle"></h3>
+    <div id="batchList" class="confirm-form"></div>
+    <div class="modal-buttons">
+      <button id="batchNo">No</button>
+      <button id="batchYes">Yes</button>
+    </div>
+  </div>
+</div>
+
+  <!-- ========== Decorative overlays ========== -->
+  <div class="angled-overlay"></div>
+  <div class="shine-overlay"></div>
+
+  <!-- ========== App Main Content (hidden until onboarding) ========== -->
+  <div id="appMain" class="hidden">
+    <div class="viewport">
+
+      <!-- ========== Screen 1 – Today ========== -->
+      <section class="screen home-screen">
+        <h2 class="greeting">
+          Welcome,&nbsp;<span id="userName">Spencer</span>
+        </h2>
+
+        <!-- ===== Main Calorie Ring ===== -->
+        <div class="ring-container">
+          <div class="stats-circle" id="dailyCircle">
+            <p class="subtitle">Calories Today</p>
+            <p id="consumedValue" class="large-number">0</p>
+
+            <!-- TDEE and Goal display -->
+            <p class="mini">
+              TDEE <span id="tdeeValue">–</span> |
+              Goal <span id="goalValue">2300</span>
+            </p>
+
+            <!-- Deficit/Surplus Line -->
+            <p class="mini" id="netLine">—</p>
+          </div>
+        </div>
+
+        <!-- ===== Macro Rings ===== -->
+        <div class="ring-container">
+          <div class="macro-ring protein" id="proteinRing">
+            <span class="macro-letter">P</span>
+            <span id="proteinValue" class="macro-amount">0 g</span>
+          </div>
+          <div class="macro-ring fat" id="fatRing">
+            <span class="macro-letter">F</span>
+            <span id="fatValue" class="macro-amount">0 g</span>
+          </div>
+          <div class="macro-ring carbs" id="carbRing">
+            <span class="macro-letter">C</span>
+            <span id="carbValue" class="macro-amount">0 g</span>
+          </div>
+        </div>
+
+        <!-- ===== Chat Section ===== -->
+        <div class="chat-section">
+          <div id="chatBox" class="chat-box"></div>
+          <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="What have you eaten today?" />
+            <button onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Screen 2 – Weekly ========== -->
+  <!-- ========== Weekly Calories Graph ========== -->
+<section class="screen weekly-screen">
+  <h2 class="weekly-title">Weekly Calories</h2>
+
+  <!-- Weekly Calorie Graph -->
+  <div class="weekly-graph-container">
+    <div id="weeklyChart" class="weekly-chart"></div>
+  </div>
+
+  <!-- Weekly Average Calorie Bar (Moved Below Graph) -->
+ <!-- Weekly Calorie Bar and Macro Rings -->
+<h3 class="weekly-averages-title">Weekly Averages</h3>
+
+<div class="weekly-summary-bar">
+  <div class="avg-bar-track">
+    <div id="avgCalorieBar" class="avg-bar-fill"></div>
+    <div class="goal-line"></div>
+    <div class="tdee-line"></div>
+  </div>
+  <div class="bar-labels">
+    <span id="avgLabel">Average: —</span>
+    <span id="goalLabel">Goal: —</span>
+    <span id="deficitLabel">—</span>
+  </div>
+</div>
+
+<div class="ring-container weekly-macros-rings">
+  <div class="macro-ring protein" id="weeklyProteinRing">
+    <span class="macro-letter">P</span>
+    <span id="weeklyProteinValue" class="macro-amount">0 g</span>
+  </div>
+  <div class="macro-ring fat" id="weeklyFatRing">
+    <span class="macro-letter">F</span>
+    <span id="weeklyFatValue" class="macro-amount">0 g</span>
+  </div>
+  <div class="macro-ring carbs" id="weeklyCarbRing">
+    <span class="macro-letter">C</span>
+    <span id="weeklyCarbValue" class="macro-amount">0 g</span>
+     </section>
+  </div>
+</div>
+<!-- ========== Screen 3 – Settings ========== -->
+<section class="screen settings-screen">
+  <h2>Settings</h2>
+  <div class="onboarding-form">
+    <label>Name
+      <input id="setName" type="text" placeholder="Spencer" />
+    </label>
+
+    <label>Sex
+      <select id="setSex">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label>
+
+    <label>Weight (lb)
+      <span id="setWeightDisplay">160 lb</span>
+      <input id="setWeight" type="range" min="80" max="400" step="1" value="160" />
+    </label>
+
+    <label>Height (in)
+      <span id="setHeightDisplay">70 in</span>
+      <input id="setHeight" type="range" min="50" max="84" step="1" value="70" />
+    </label>
+
+    <label>Age
+      <span id="setAgeDisplay">25</span>
+      <input id="setAge" type="range" min="10" max="100" step="1" value="25" />
+    </label>
+
+    <label>Goal Calories
+      <span id="setGoalDisplay">2300 kcal</span>
+      <input id="setGoalCalories" type="range" min="1200" max="4000" step="50" value="2300" />
+    </label>
+  </div>
+
+  <button id="saveSettings">Save Settings</button>
+</section>
