@@ -7,4 +7,8 @@
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+  
 npm install
+git add package-lock.json
+git commit -m "Add package-lock.json for Netlify build"
+git push
